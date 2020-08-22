@@ -3,16 +3,45 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include "AudioFileSourceSD.h"
+#include "AudioFileSourceID3.h"
+#include "AudioGeneratorMP3.h"
+#include "AudioOutputI2S.h"
 
 // wifi settings
 const char* ssid = "********";
 const char* password = "********";
-
 const char* domain = "m5stack";
-
 WebServer server(80);
 
 const int led = 13;
+
+AudioGeneratorMP3 *mp3;
+AudioFileSourceSD *file;
+AudioOutputI2S *out;
+AudioFileSourceID3 *id3;
+
+/* Plays MP3 */
+void playMP3(char *filename){
+  file = new AudioFileSourceSD(filename);
+  id3 = new AudioFileSourceID3(file);
+  out = new AudioOutputI2S(0, 1); // Output to builtInDAC
+  out->SetOutputModeMono(true);
+  out->SetGain(1.0);
+  mp3 = new AudioGeneratorMP3();
+  mp3->begin(id3, out);
+  while(mp3->isRunning()) {
+    if (!mp3->loop()) mp3->stop();
+  }
+}
+
+/* Draws 200x200 JPG file */
+void drawARMarker(char *filename) {
+  uint16_t x = 60;
+  uint16_t y = 20;
+
+  M5.Lcd.drawJpgFile(SD, filename, x, y);
+}
 
 void handleRoot() {
   digitalWrite(led, 1);
