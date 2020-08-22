@@ -1,5 +1,13 @@
 #include <M5Stack.h>
 
+/* Draws 200x200 JPG file */
+void drawARMarker(char *filename) {
+  uint16_t x = 60;
+  uint16_t y = 20;
+
+  M5.Lcd.drawJpgFile(SD, filename, x, y);
+}
+
 // the setup routine runs once when M5Stack starts up
 void setup(){
 
