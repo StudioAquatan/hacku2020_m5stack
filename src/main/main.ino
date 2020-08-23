@@ -16,8 +16,6 @@ const char* password = "67j9b9mg";
 const char* domain = "m5stack";
 WebServer server(80);
 
-const int led = 13;
-
 AudioGeneratorMP3 *mp3;
 AudioFileSourceSD *file;
 AudioOutputI2S *out;
@@ -45,15 +43,20 @@ void drawARMarker(char *filename) {
   M5.Lcd.drawJpgFile(SD, filename, x, y);
 }
 
+/* ENDPOINT:Root */
 void handleRoot() {
-  digitalWrite(led, 1);
   server.send(200, "text/plain", "hello from m5stack!");
-  digitalWrite(led, 0);
   M5.Lcd.println("Hello");
 }
 
+/* ENDPOINT:status */
+void handleStatus() {
+  server.send(200, "text/plain", "handleStatus");
+  M5.Lcd.println("Hello");
+}
+
+/* ENDPOINT:URI Not Found */
 void handleNotFound() {
-  digitalWrite(led, 1);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -66,7 +69,6 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  digitalWrite(led, 0);
   M5.Lcd.println("Not Found");
 }
 
@@ -76,7 +78,6 @@ void setup(){
 
   // WiFi preparation
   pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -99,9 +100,7 @@ void setup(){
 
   server.on("/", handleRoot);
 
-  server.on("/inline", []() {
-    server.send(200, "text/plain", "this works as well");
-  });
+  server.on("/", handleStatus);
 
   server.onNotFound(handleNotFound);
 
