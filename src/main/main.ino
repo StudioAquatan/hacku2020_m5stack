@@ -14,12 +14,23 @@ const char* password = "********";
 const char* domain = "m5stack";
 WebServer server(80);
 
-const int led = 13;
+/* status for m5stack
+ *  1: positive mode
+ *  2: negative mode
+ *  0: off
+ */
+int status = 0;
 
 AudioGeneratorMP3 *mp3;
 AudioFileSourceSD *file;
 AudioOutputI2S *out;
 AudioFileSourceID3 *id3;
+
+// data files path in SD card
+const char* filePositiveARMarker = "********";
+const char* filePositiveMP3 = "********";
+const char* fileNegativeARMarker = "********";
+const char* fileNegativeMP3 = "********";
 
 /* Plays MP3 */
 void playMP3(char *filename){
@@ -43,15 +54,41 @@ void drawARMarker(char *filename) {
   M5.Lcd.drawJpgFile(SD, filename, x, y);
 }
 
+/* ENDPOINT:Root */
 void handleRoot() {
-  digitalWrite(led, 1);
   server.send(200, "text/plain", "hello from m5stack!");
-  digitalWrite(led, 0);
   M5.Lcd.println("Hello");
 }
 
+/* ENDPOINT:status */
+void handleStatus() {
+  // parse json
+  if (server.method() == HTTP_POST){
+    String postdata = server.arg(0);
+    Serial.println(postdata);
+
+    if (postdata = "positive"){
+//      drawARMarker(filePositiveARMarker);
+//      playMP3(filePositiveMP3);
+      server.send(200, "text/plain", "Positive audio start");
+    } else if (postdata = "negative"){
+//      drawARMarker(fileNegativeARMarker);
+//      playMP3(fileNegativeMP3);
+      server.send(200, "text/plain", "Negative audio start");
+    } else if (postdata = "off"){
+//      Clear display
+//      Stop MP3
+      server.send(200, "text/plain", "audio end");
+    }
+    
+    server.send(400, "text/plain", "Bad Request");
+  } else {
+    server.send(400, "text/plain", "Require POST Method");
+  }
+}
+
+/* ENDPOINT:URI Not Found */
 void handleNotFound() {
-  digitalWrite(led, 1);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -64,7 +101,6 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  digitalWrite(led, 0);
   M5.Lcd.println("Not Found");
 }
 
@@ -73,8 +109,6 @@ void setup(){
   M5.Power.begin();
 
   // WiFi preparation
-  pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -95,14 +129,10 @@ void setup(){
     Serial.println("MDNS responder started");
   }
 
+  // Server start
   server.on("/", handleRoot);
-
-  server.on("/inline", []() {
-    server.send(200, "text/plain", "this works as well");
-  });
-
+  server.on("/status", handleStatus);
   server.onNotFound(handleNotFound);
-
   server.begin();
   Serial.println("HTTP server started");
   
