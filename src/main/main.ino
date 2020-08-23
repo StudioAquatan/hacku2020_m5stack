@@ -9,8 +9,10 @@
 #include "AudioOutputI2S.h"
 
 // wifi settings
-const char* ssid = "********";
-const char* password = "********";
+const char* ssid = "HG8045-EE9D-bg";
+const char* password = "67j9b9mg";
+// const char* ssid = "********";
+// const char* password = "********";
 const char* domain = "m5stack";
 WebServer server(80);
 
