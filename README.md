@@ -36,14 +36,14 @@ return `Hello from m5stack`
 
 ### `http://m5stack.local/status`
 
-POST: `{"status": "positive"}`  
+POST: `status=positive`  
 Start positive audio and display AR marker
 return `Positive audio start`
 
-POST: `{"status": "negative"}`  
-Start negative audio and display AR marker
-return `Negative audio start`
+POST: `status=negative`  
+Start cheering audio and display AR marker
+return `Cheering audio start`
 
-POST: `{"status": "off"}`  
+POST: `status=off`  
 Stop audio and turn to waiting mode
 return `audio end`
