@@ -14,23 +14,16 @@ const char* password = "********";
 const char* domain = "m5stack";
 WebServer server(80);
 
-/* status for m5stack
- *  1: positive mode
- *  2: negative mode
- *  0: off
- */
-int status = 0;
-
 AudioGeneratorMP3 *mp3;
 AudioFileSourceSD *file;
 AudioOutputI2S *out;
 AudioFileSourceID3 *id3;
 
 // data files path in SD card
-char* filePositiveARMarker = "/***.jpg";
-char* filePositiveMP3 = "/***.mp3";
-char* fileNegativeARMarker = "/***.jpg";
-char* fileNegativeMP3 = "/***.mp3";
+char* filePositiveARMarker = "/filePositiveARMarker.jpg";
+char* filePositiveMP3 = "/filePositiveMP3.mp3";
+char* fileNegativeARMarker = "/fileNegativeARMarker.jpg";
+char* fileNegativeMP3 = "/fileNegativeMP3.mp3";
 
 /* Plays MP3 */
 void playMP3(char *filename){
@@ -41,9 +34,6 @@ void playMP3(char *filename){
   out->SetGain(1.0);
   mp3 = new AudioGeneratorMP3();
   mp3->begin(id3, out);
-  while(mp3->isRunning()) {
-    if (!mp3->loop()) mp3->stop();
-  }
 }
 
 /* Draws 200x200 JPG file */
@@ -51,6 +41,7 @@ void drawARMarker(char *filename) {
   uint16_t x = 60;
   uint16_t y = 20;
 
+  M5.Lcd.fillScreen(TFT_BLACK);
   M5.Lcd.drawJpgFile(SD, filename, x, y);
 }
 
@@ -66,23 +57,23 @@ void handleStatus() {
     String postdata = "";
     for (uint8_t i = 0; i < server.args(); i++){
       if (server.argName(i) == "status"){
-        postdata = server.arg(0);
+        postdata = server.arg(i);
         Serial.println(postdata);
         break;
       }
     }
 
-    if (postdata = "positive"){
+    if (postdata == "positive"){
       drawARMarker(filePositiveARMarker);
       playMP3(filePositiveMP3);
       server.send(200, "text/plain", "Positive audio start");
-    } else if (postdata = "negative"){
+    } else if (postdata == "negative"){
       drawARMarker(fileNegativeARMarker);
       playMP3(fileNegativeMP3);
       server.send(200, "text/plain", "Cheering audio start");
-    } else if (postdata = "off"){
-//      Clear display
-//      Stop MP3
+    } else if (postdata == "off"){
+      M5.Lcd.fillScreen(TFT_BLACK);
+      mp3->stop();
       server.send(200, "text/plain", "audio end");
     }
     
@@ -144,8 +135,14 @@ void setup(){
   // LCD display
   M5.Lcd.setTextSize(3);
   M5.Lcd.println("Waiting");
+
+  playMP3(filePositiveMP3);
+  mp3->stop();
 }
 
 void loop() {
+  if(mp3->isRunning()) {
+    if (!mp3->loop()) mp3->stop();
+  }
   server.handleClient();
 }
