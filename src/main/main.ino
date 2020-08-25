@@ -27,10 +27,10 @@ AudioOutputI2S *out;
 AudioFileSourceID3 *id3;
 
 // data files path in SD card
-const char* filePositiveARMarker = "********";
-const char* filePositiveMP3 = "********";
-const char* fileNegativeARMarker = "********";
-const char* fileNegativeMP3 = "********";
+char* filePositiveARMarker = "/***.jpg";
+char* filePositiveMP3 = "/***.mp3";
+char* fileNegativeARMarker = "/***.jpg";
+char* fileNegativeMP3 = "/***.mp3";
 
 /* Plays MP3 */
 void playMP3(char *filename){
@@ -62,19 +62,24 @@ void handleRoot() {
 
 /* ENDPOINT:status */
 void handleStatus() {
-  // parse json
   if (server.method() == HTTP_POST){
-    String postdata = server.arg(0);
-    Serial.println(postdata);
+    String postdata = "";
+    for (uint8_t i = 0; i < server.args(); i++){
+      if (server.argName(i) == "status"){
+        postdata = server.arg(0);
+        Serial.println(postdata);
+        break;
+      }
+    }
 
     if (postdata = "positive"){
-//      drawARMarker(filePositiveARMarker);
-//      playMP3(filePositiveMP3);
+      drawARMarker(filePositiveARMarker);
+      playMP3(filePositiveMP3);
       server.send(200, "text/plain", "Positive audio start");
     } else if (postdata = "negative"){
-//      drawARMarker(fileNegativeARMarker);
-//      playMP3(fileNegativeMP3);
-      server.send(200, "text/plain", "Negative audio start");
+      drawARMarker(fileNegativeARMarker);
+      playMP3(fileNegativeMP3);
+      server.send(200, "text/plain", "Cheering audio start");
     } else if (postdata = "off"){
 //      Clear display
 //      Stop MP3
