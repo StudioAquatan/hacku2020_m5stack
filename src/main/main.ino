@@ -37,7 +37,7 @@ void playMP3(char *filename){
   mp3->begin(id3, out);
 }
 
-/* Draws 320x240 JPG file */
+/* Draws 240x240 JPG file */
 void drawARMarker(char *filename) {
   uint16_t x = 40;
   uint16_t y = 0;
@@ -76,7 +76,7 @@ void handleStatus() {
       playMP3(fileNegativeMP3);
       server.send(200, "text/plain", "Cheering audio start");
     } else if (postdata == "off"){
-      M5.Lcd.fillScreen(TFT_BLACK);
+      drawARMarker(fileDefault);
       mp3->stop();
       server.send(200, "text/plain", "audio end");
     }
