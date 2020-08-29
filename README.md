@@ -47,3 +47,7 @@ return `Cheering audio start`
 POST: `status=off`  
 Stop audio and turn to waiting mode
 return `audio end`
+
+## 関連リポジトリ
+- [hacku2020](https://github.com/StudioAquatan/hacku2020)
+- [HackU2020_AR](https://github.com/StudioAquatan/HackU2020_AR)
