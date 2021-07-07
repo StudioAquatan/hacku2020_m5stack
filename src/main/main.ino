@@ -24,6 +24,7 @@ char* filePositiveARMarker = "/filePositiveARMarker.jpg";
 char* filePositiveMP3 = "/filePositiveMP3.mp3";
 char* fileNegativeARMarker = "/fileNegativeARMarker.jpg";
 char* fileNegativeMP3 = "/fileNegativeMP3.mp3";
+char* fileDefault = "/fileDefault.jpg";
 
 /* Plays MP3 */
 void playMP3(char *filename){
@@ -36,10 +37,10 @@ void playMP3(char *filename){
   mp3->begin(id3, out);
 }
 
-/* Draws 200x200 JPG file */
+/* Draws 240x240 JPG file */
 void drawARMarker(char *filename) {
-  uint16_t x = 60;
-  uint16_t y = 20;
+  uint16_t x = 40;
+  uint16_t y = 0;
 
   M5.Lcd.fillScreen(TFT_BLACK);
   M5.Lcd.drawJpgFile(SD, filename, x, y);
@@ -65,14 +66,17 @@ void handleStatus() {
 
     if (postdata == "positive"){
       drawARMarker(filePositiveARMarker);
+      mp3->stop();
       playMP3(filePositiveMP3);
       server.send(200, "text/plain", "Positive audio start");
     } else if (postdata == "negative"){
       drawARMarker(fileNegativeARMarker);
+      mp3->stop();
+      delay(10000);
       playMP3(fileNegativeMP3);
       server.send(200, "text/plain", "Cheering audio start");
     } else if (postdata == "off"){
-      M5.Lcd.fillScreen(TFT_BLACK);
+      drawARMarker(fileDefault);
       mp3->stop();
       server.send(200, "text/plain", "audio end");
     }
@@ -134,8 +138,9 @@ void setup(){
   
   // LCD display
   M5.Lcd.setTextSize(3);
-  M5.Lcd.println("Waiting");
-
+  drawARMarker(fileDefault);
+  Serial.println("Waiting");
+  
   playMP3(filePositiveMP3);
   mp3->stop();
 }
